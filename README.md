@@ -1,6 +1,6 @@
 # schaban.github.io
-![the hard way](https://schaban.github.io/pic/gp_hard.png)
----
+[![the hard way](https://schaban.github.io/pic/gp_hard.png)](https://github.com/schaban/crosscore_dev/blob/main/README.md)
+<hr/>
 
 [crosscore web-demo](https://schaban.github.io/crosscore_web_demo/wgl_test.html)
 
