@@ -38,8 +38,17 @@ static void vemaMemSet(void* pDst, const int val, const size_t len) {
 #	define VEMA_SIMD_ELEM_MASK(_idx) VEMA_SIMD_MIX_MASK(_idx, _idx, _idx, _idx)
 #endif
 
-#if defined(VEMA_ARM_VSQRT)
+#if defined (VEMA_NEON) || defined(VEMA_ARM_VSQRT)
 #	include <arm_neon.h>
+static float32x4_t vemaNeonElem(const float32x4_t v, const int idx) {
+	int i;
+	float32x4_t res;
+	float x = v[idx];
+	for (i = 0; i < 4; ++i) {
+		res[i] = x;
+	}
+	return res;
+}
 #endif
 
 
@@ -1857,6 +1866,34 @@ VEMA_IFC(void, MulMtx4x4F)(VemaMtx4x4F m0, const VemaMtx4x4F m1, const VemaMtx4x
 			)
 		)
 	);
+#elif defined(VEMA_NEON)
+	float* p = (float*)m0;
+	float* pA = (float*)m1;
+	float* pB = (float*)m2;
+	float32x4_t rA0 = vld1q_f32(&pA[0x0]);
+	float32x4_t rA1 = vld1q_f32(&pA[0x4]);
+	float32x4_t rA2 = vld1q_f32(&pA[0x8]);
+	float32x4_t rA3 = vld1q_f32(&pA[0xC]);
+	float32x4_t rB0 = vld1q_f32(&pB[0x0]);
+	float32x4_t rB1 = vld1q_f32(&pB[0x4]);
+	float32x4_t rB2 = vld1q_f32(&pB[0x8]);
+	float32x4_t rB3 = vld1q_f32(&pB[0xC]);
+	vst1q_f32(&p[0x0],
+		vaddq_f32(vaddq_f32(vaddq_f32(
+			vmulq_f32(vemaNeonElem(rA0, 0), rB0), vmulq_f32(vemaNeonElem(rA0, 1), rB1)),
+			vmulq_f32(vemaNeonElem(rA0, 2), rB2)), vmulq_f32(vemaNeonElem(rA0, 3), rB3)));
+	vst1q_f32(&p[0x4],
+		vaddq_f32(vaddq_f32(vaddq_f32(
+			vmulq_f32(vemaNeonElem(rA1, 0), rB0), vmulq_f32(vemaNeonElem(rA1, 1), rB1)),
+			vmulq_f32(vemaNeonElem(rA1, 2), rB2)), vmulq_f32(vemaNeonElem(rA1, 3), rB3)));
+	vst1q_f32(&p[0x8],
+		vaddq_f32(vaddq_f32(vaddq_f32(
+			vmulq_f32(vemaNeonElem(rA2, 0), rB0), vmulq_f32(vemaNeonElem(rA2, 1), rB1)),
+			vmulq_f32(vemaNeonElem(rA2, 2), rB2)), vmulq_f32(vemaNeonElem(rA2, 3), rB3)));
+	vst1q_f32(&p[0xC],
+		vaddq_f32(vaddq_f32(vaddq_f32(
+			vmulq_f32(vemaNeonElem(rA3, 0), rB0), vmulq_f32(vemaNeonElem(rA3, 1), rB1)),
+			vmulq_f32(vemaNeonElem(rA3, 2), rB2)), vmulq_f32(vemaNeonElem(rA3, 3), rB3)));
 #else
 	VemaMtx4x4F tm;
 	VEMA_FN(MulMtxF)(&tm[0][0], &m1[0][0], &m2[0][0], 4, 4, 4);
