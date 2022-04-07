@@ -99,3 +99,38 @@ $_DISASM_ kernel8.elf > kernel8.txt
 $_OBJCOPY_ -O binary kernel8.elf kernel8.img
 $_DISASM_ -m aarch64 -b binary kernel8.img > kernel8.img.txt
 ```
+
+
+***
+link.ld
+```
+SECTIONS {
+	. = 0x80000;
+	.text : { KEEP(*(*.boot)) *(.text .text.* .gnu.linkonce.t*) }
+	.rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) }
+	PROVIDE(_data = .);
+	.data : { *(.data .data.* .gnu.linkonce.d*) }
+	.bss (NOLOAD): {
+		. = ALIGN(16);
+		__bss_start = .;
+		*(.bss .bss.*)
+		*(COMMON)
+		__bss_end = .;
+	}
+	.mbox : {
+		. = ALIGN(16);
+		__mbox_mem = .;
+		. = . + 0x1000;
+	}
+	.stack : {
+		. = ALIGN(16);
+		__stack_space = .;
+		. = . + 0x100000 * 4;
+	}
+	_end = .;
+
+	/DISCARD/ : { *(.comment) *(.gnu*) *(.note*) *(.eh_frame*) }
+}
+```
+
+
