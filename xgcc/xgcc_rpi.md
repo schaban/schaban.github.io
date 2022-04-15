@@ -54,7 +54,7 @@ BIN_GCC=build/aa64-gcc
 if [ ! -d "$BIN_GCC" ]; then mkdir -p $BIN_GCC; fi
 
 XGCC_PREFIX="--prefix=/usr/local/xgcc_aarch64"
-XGCC_OPTS="--target=aarch64-elf --enable-shared --enable-threads=posix --with-system-zlib --with-isl --enable-__cxa_atexit --disable-libunwind-exceptions --enable-clocale=gnu --disable-libstdcxx-pch --disable-libssp --enable-plugin --disable-linker-build-id --enable-lto --enable-install-libiberty --with-linker-hash-style=gnu --with-gnu-ld --enable-gnu-indirect-function --disable-multilib --disable-werror --enable-checking=release --enable-default-pie --enable-default-ssp --enable-gnu-unique-object"
+XGCC_OPTS="--target=aarch64-elf --enable-threads=posix --with-system-zlib --with-isl --enable-__cxa_atexit --disable-libunwind-exceptions --enable-clocale=gnu --disable-libstdcxx-pch --disable-libssp --enable-plugin --disable-linker-build-id --enable-lto --enable-install-libiberty --with-linker-hash-style=gnu --with-gnu-ld --enable-gnu-indirect-function --disable-multilib --disable-werror --enable-checking=release --enable-default-pie --enable-default-ssp --enable-gnu-unique-object"
 
 cd $BIN_BU
 ../binutils-*/configure $XGCC_PREFIX $XGCC_OPTS
@@ -86,7 +86,6 @@ _LD_="$CROSS_PATH/bin/aarch64-elf-ld -nostdlib"
 _DISASM_="$CROSS_PATH/bin/aarch64-elf-objdump -D"
 _OBJCOPY_="$CROSS_PATH/bin/aarch64-elf-objcopy"
 
-#!/bin/sh
 if [ ! -d "tmp" ]; then
 	mkdir -p tmp
 fi
@@ -132,5 +131,4 @@ SECTIONS {
 	/DISCARD/ : { *(.comment) *(.gnu*) *(.note*) *(.eh_frame*) }
 }
 ```
-
 
