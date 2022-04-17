@@ -71,6 +71,7 @@ cd ../..
 
 
 ***
+example build script
 ```
 #!/bin/sh
 
@@ -86,9 +87,7 @@ _LD_="$CROSS_PATH/bin/aarch64-elf-ld -nostdlib"
 _DISASM_="$CROSS_PATH/bin/aarch64-elf-objdump -D"
 _OBJCOPY_="$CROSS_PATH/bin/aarch64-elf-objcopy"
 
-if [ ! -d "tmp" ]; then
-	mkdir -p tmp
-fi
+mkdir -p tmp
 
 $_ASM_ -c src/boot.S -o tmp/boot.o
 
