@@ -2228,6 +2228,35 @@ VEMA_IFC(void, ConvertMtx4x4FtoMtx3x4F)(VemaMtx3x4F dst, const VemaMtx4x4F src) 
 }
 
 VEMA_IFC(void, ConcatMtx3x4F)(VemaMtx3x4F m0, const VemaMtx3x4F m1, const VemaMtx3x4F m2) {
+#if defined(VEMA_SSE) || defined(VEMA_AVX)
+	float* pD = (float*)m0;
+	float* pA = (float*)m1;
+	float* pB = (float*)m2;
+	__m128 rA0 = _mm_loadu_ps(&pA[0x0]);
+	__m128 rA1 = _mm_loadu_ps(&pA[0x4]);
+	__m128 rA2 = _mm_loadu_ps(&pA[0x8]);
+	__m128 rB0 = _mm_loadu_ps(&pB[0x0]);
+	__m128 rB1 = _mm_loadu_ps(&pB[0x4]);
+	__m128 rB2 = _mm_loadu_ps(&pB[0x8]);
+	_mm_storeu_ps(&pD[0],
+		_mm_add_ps(_mm_add_ps(
+			_mm_mul_ps(_mm_shuffle_ps(rB0, rB0, VEMA_SIMD_ELEM_MASK(0)), rA0),
+			_mm_mul_ps(_mm_shuffle_ps(rB0, rB0, VEMA_SIMD_ELEM_MASK(1)), rA1)),
+			_mm_mul_ps(_mm_shuffle_ps(rB0, rB0, VEMA_SIMD_ELEM_MASK(2)), rA2)));
+	_mm_storeu_ps(&pD[4],
+		_mm_add_ps(_mm_add_ps(
+			_mm_mul_ps(_mm_shuffle_ps(rB1, rB1, VEMA_SIMD_ELEM_MASK(0)), rA0),
+			_mm_mul_ps(_mm_shuffle_ps(rB1, rB1, VEMA_SIMD_ELEM_MASK(1)), rA1)),
+			_mm_mul_ps(_mm_shuffle_ps(rB1, rB1, VEMA_SIMD_ELEM_MASK(2)), rA2)));
+	_mm_storeu_ps(&pD[8],
+		_mm_add_ps(_mm_add_ps(
+			_mm_mul_ps(_mm_shuffle_ps(rB2, rB2, VEMA_SIMD_ELEM_MASK(0)), rA0),
+			_mm_mul_ps(_mm_shuffle_ps(rB2, rB2, VEMA_SIMD_ELEM_MASK(1)), rA1)),
+			_mm_mul_ps(_mm_shuffle_ps(rB2, rB2, VEMA_SIMD_ELEM_MASK(2)), rA2)));
+	m0[0][3] += m2[0][3];
+	m0[1][3] += m2[1][3];
+	m0[2][3] += m2[2][3];
+#else
 	float a00 = m1[0][0]; float a01 = m1[1][0]; float a02 = m1[2][0];
 	float a10 = m1[0][1]; float a11 = m1[1][1]; float a12 = m1[2][1];
 	float a20 = m1[0][2]; float a21 = m1[1][2]; float a22 = m1[2][2];
@@ -2248,6 +2277,7 @@ VEMA_IFC(void, ConcatMtx3x4F)(VemaMtx3x4F m0, const VemaMtx3x4F m1, const VemaMt
 	m0[2][1] = a10*b02 + a11*b12 + a12*b22;
 	m0[2][2] = a20*b02 + a21*b12 + a22*b22;
 	m0[2][3] = a30*b02 + a31*b12 + a32*b22 + b32;
+#endif
 }
 
 
