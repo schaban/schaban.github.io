@@ -1903,7 +1903,7 @@ VEMA_IFC(void, MulMtx4x4F)(VemaMtx4x4F m0, const VemaMtx4x4F m1, const VemaMtx4x
 			_mm_mul_ps(_mm_shuffle_ps(rA3, rA3, VEMA_SIMD_ELEM_MASK(2)), rB2)),
 			_mm_mul_ps(_mm_shuffle_ps(rA3, rA3, VEMA_SIMD_ELEM_MASK(3)), rB3)));
 #elif defined(VEMA_NEON)
-	float* p = (float*)m0;
+	float* pD = (float*)m0;
 	float* pA = (float*)m1;
 	float* pB = (float*)m2;
 	float32x4_t rA0 = vld1q_f32(&pA[0x0]);
@@ -1914,19 +1914,19 @@ VEMA_IFC(void, MulMtx4x4F)(VemaMtx4x4F m0, const VemaMtx4x4F m1, const VemaMtx4x
 	float32x4_t rB1 = vld1q_f32(&pB[0x4]);
 	float32x4_t rB2 = vld1q_f32(&pB[0x8]);
 	float32x4_t rB3 = vld1q_f32(&pB[0xC]);
-	vst1q_f32(&p[0x0],
+	vst1q_f32(&pD[0x0],
 		vaddq_f32(vaddq_f32(vaddq_f32(
 			vmulq_f32(vemaNeonElem(rA0, 0), rB0), vmulq_f32(vemaNeonElem(rA0, 1), rB1)),
 			vmulq_f32(vemaNeonElem(rA0, 2), rB2)), vmulq_f32(vemaNeonElem(rA0, 3), rB3)));
-	vst1q_f32(&p[0x4],
+	vst1q_f32(&pD[0x4],
 		vaddq_f32(vaddq_f32(vaddq_f32(
 			vmulq_f32(vemaNeonElem(rA1, 0), rB0), vmulq_f32(vemaNeonElem(rA1, 1), rB1)),
 			vmulq_f32(vemaNeonElem(rA1, 2), rB2)), vmulq_f32(vemaNeonElem(rA1, 3), rB3)));
-	vst1q_f32(&p[0x8],
+	vst1q_f32(&pD[0x8],
 		vaddq_f32(vaddq_f32(vaddq_f32(
 			vmulq_f32(vemaNeonElem(rA2, 0), rB0), vmulq_f32(vemaNeonElem(rA2, 1), rB1)),
 			vmulq_f32(vemaNeonElem(rA2, 2), rB2)), vmulq_f32(vemaNeonElem(rA2, 3), rB3)));
-	vst1q_f32(&p[0xC],
+	vst1q_f32(&pD[0xC],
 		vaddq_f32(vaddq_f32(vaddq_f32(
 			vmulq_f32(vemaNeonElem(rA3, 0), rB0), vmulq_f32(vemaNeonElem(rA3, 1), rB1)),
 			vmulq_f32(vemaNeonElem(rA3, 2), rB2)), vmulq_f32(vemaNeonElem(rA3, 3), rB3)));
@@ -2253,6 +2253,34 @@ VEMA_IFC(void, ConcatMtx3x4F)(VemaMtx3x4F m0, const VemaMtx3x4F m1, const VemaMt
 			_mm_mul_ps(_mm_shuffle_ps(rB2, rB2, VEMA_SIMD_ELEM_MASK(0)), rA0),
 			_mm_mul_ps(_mm_shuffle_ps(rB2, rB2, VEMA_SIMD_ELEM_MASK(1)), rA1)),
 			_mm_mul_ps(_mm_shuffle_ps(rB2, rB2, VEMA_SIMD_ELEM_MASK(2)), rA2)));
+	m0[0][3] += m2[0][3];
+	m0[1][3] += m2[1][3];
+	m0[2][3] += m2[2][3];
+#elif defined(VEMA_NEON)
+	float* pD = (float*)m0;
+	float* pA = (float*)m1;
+	float* pB = (float*)m2;
+	float32x4_t rA0 = vld1q_f32(&pA[0x0]);
+	float32x4_t rA1 = vld1q_f32(&pA[0x4]);
+	float32x4_t rA2 = vld1q_f32(&pA[0x8]);
+	float32x4_t rB0 = vld1q_f32(&pB[0x0]);
+	float32x4_t rB1 = vld1q_f32(&pB[0x4]);
+	float32x4_t rB2 = vld1q_f32(&pB[0x8]);
+	vst1q_f32(&pD[0],
+		vaddq_f32(vaddq_f32(
+			vmulq_f32(vemaNeonElem(rB0, 0), rA0),
+			vmulq_f32(vemaNeonElem(rB0, 1), rA1)),
+			vmulq_f32(vemaNeonElem(rB0, 2), rA2)));
+	vst1q_f32(&pD[4],
+		vaddq_f32(vaddq_f32(
+			vmulq_f32(vemaNeonElem(rB1, 0), rA0),
+			vmulq_f32(vemaNeonElem(rB1, 1), rA1)),
+			vmulq_f32(vemaNeonElem(rB1, 2), rA2)));
+	vst1q_f32(&pD[8],
+		vaddq_f32(vaddq_f32(
+			vmulq_f32(vemaNeonElem(rB2, 0), rA0),
+			vmulq_f32(vemaNeonElem(rB2, 1), rA1)),
+			vmulq_f32(vemaNeonElem(rB2, 2), rA2)));
 	m0[0][3] += m2[0][3];
 	m0[1][3] += m2[1][3];
 	m0[2][3] += m2[2][3];
