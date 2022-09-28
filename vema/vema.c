@@ -1782,7 +1782,7 @@ VEMA_IFC(void, ZeroMtx4x4F)(VemaMtx4x4F m) {
 }
 
 VEMA_IFC(void, IdentityMtx4x4F)(VemaMtx4x4F m) {
-	static VemaMtx4x4F im = {
+	static const VemaMtx4x4F im = {
 		{ 1.0f, 0.0f, 0.0f, 0.0f },
 		{ 0.0f, 1.0f, 0.0f, 0.0f },
 		{ 0.0f, 0.0f, 1.0f, 0.0f },
@@ -1792,7 +1792,7 @@ VEMA_IFC(void, IdentityMtx4x4F)(VemaMtx4x4F m) {
 }
 
 VEMA_IFC(void, CopyMtx4x4F)(VemaMtx4x4F dst, const VemaMtx4x4F src) {
-	if (dst != src) {
+	if ((void*)dst != (void*)src) {
 		vemaMemCpy(dst, src, sizeof(VemaMtx4x4F));
 	}
 }
@@ -2161,7 +2161,7 @@ VEMA_IFC(void, ViewMtx4x4F)(VemaMtx4x4F m, const VemaVec3F pos, const VemaVec3F 
 	VEMA_FN(TransposeAxesMtx4x4F)(m);
 	VEMA_FN(CopyVec3F)(org, pos);
 	VEMA_FN(NegVec3F)(org);
-	VEMA_FN(CalcPntMtx4x4F)(org, org, m);
+	VEMA_FN(CalcPntMtx4x4F)(org, org, VEMA_AS_CONST_MTX(m));
 	VEMA_FN(TranslationMtx4x4F)(m, org);
 }
 
@@ -2207,7 +2207,7 @@ VEMA_IFC(void, ZeroMtx3x4F)(VemaMtx3x4F m) {
 }
 
 VEMA_IFC(void, IdentityMtx3x4F)(VemaMtx3x4F m) {
-	static VemaMtx3x4F im = {
+	static const VemaMtx3x4F im = {
 		{ 1.0f, 0.0f, 0.0f, 0.0f },
 		{ 0.0f, 1.0f, 0.0f, 0.0f },
 		{ 0.0f, 0.0f, 1.0f, 0.0f },
@@ -2216,7 +2216,7 @@ VEMA_IFC(void, IdentityMtx3x4F)(VemaMtx3x4F m) {
 }
 
 VEMA_IFC(void, CopyMtx3x4F)(VemaMtx3x4F dst, const VemaMtx3x4F src) {
-	if (dst != src) {
+	if ((void*)dst != (void*)src) {
 		vemaMemCpy(dst, src, sizeof(VemaMtx3x4F));
 	}
 }
