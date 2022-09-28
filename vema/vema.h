@@ -22,7 +22,7 @@ extern "C" {
 #define VEMA_PI_D 3.1415926535897931
 #define VEMA_PI_F 3.14159274f
 
-#define VEMA_AS_CONST_MTX(_m) *(const VemaMtx4x4F*)(_m)
+#define VEMA_AS_CONST(_T, _m) *(const _T*)(_m)
 
 typedef uint16_t VemaHalf;
 typedef float VemaVec2F[2];

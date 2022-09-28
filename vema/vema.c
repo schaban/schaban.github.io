@@ -2161,7 +2161,7 @@ VEMA_IFC(void, ViewMtx4x4F)(VemaMtx4x4F m, const VemaVec3F pos, const VemaVec3F 
 	VEMA_FN(TransposeAxesMtx4x4F)(m);
 	VEMA_FN(CopyVec3F)(org, pos);
 	VEMA_FN(NegVec3F)(org);
-	VEMA_FN(CalcPntMtx4x4F)(org, org, VEMA_AS_CONST_MTX(m));
+	VEMA_FN(CalcPntMtx4x4F)(org, org, VEMA_AS_CONST(VemaMtx4x4F, m));
 	VEMA_FN(TranslationMtx4x4F)(m, org);
 }
 
