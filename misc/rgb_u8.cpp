@@ -29,7 +29,7 @@ struct RGB_U8 {
 				uint16_t res = *pDst;
 				res *= scl;
 				res += val;
-				if (res >= 0xFF) {
+				if (res > 0xFF) {
 					res = 0xFF;
 				}
 				*pDst = (uint8_t)res;
