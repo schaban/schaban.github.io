@@ -5,6 +5,7 @@
 #define PUSH_OLD 2
 
 uint8_t g_pushState = 0;
+uint8_t g_pushSet = 0;
 uint32_t g_pushCnt = 0;
 
 void setup() {
@@ -23,12 +24,14 @@ static void update_state() {
   g_pushState |= (g_pushState & PUSH_NOW) ? PUSH_OLD : 0;
   g_pushState &= ~PUSH_NOW;
   g_pushState |= btn ? PUSH_NOW : 0;
+  g_pushState |= g_pushSet;
 }
 
 void loop() {
   if (g_pushCnt > 0) {
     --g_pushCnt;
     g_pushState = PUSH_OLD;
+    g_pushSet = PUSH_OLD;
   } else {
     update_state();
     bool now = !!(g_pushState & PUSH_NOW);
@@ -41,5 +44,6 @@ void loop() {
       g_pushCnt = 70000;
       write_push(0);
     }
+    g_pushSet = 0;
   }
 }
