@@ -21,6 +21,7 @@ static void update_state() {
   int btn = digitalRead(PUSH_IN_PIN);
   g_pushState &= ~PUSH_OLD;
   g_pushState |= (g_pushState & PUSH_NOW) ? PUSH_OLD : 0;
+  g_pushState &= ~PUSH_NOW;
   g_pushState |= btn ? PUSH_NOW : 0;
 }
 
