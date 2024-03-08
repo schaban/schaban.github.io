@@ -14,7 +14,7 @@ void setup() {
   pinMode(PUSH_OUT_PIN, OUTPUT);
 }
 
-__attribute__((noinline)) static write_push(uint8_t val) {
+__attribute__((noinline)) static void write_push(uint8_t val) {
   digitalWrite(PUSH_OUT_PIN, val);
 }
 
