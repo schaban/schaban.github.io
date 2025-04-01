@@ -3,6 +3,8 @@
 #include "crosscore.hpp"
 #include "oglsys.hpp"
 
+void test_ocl();
+
 static void tst_dbgmsg(const char* pMsg) {
 	//::OutputDebugStringA(pMsg);
 	::printf("%s", pMsg);
