@@ -1,0 +1,157 @@
+function float LI_encode(float x) {
+	float r = x;
+	float c = 0.0f;
+	while (r >= 1) {
+		r = log(r);
+		++c;
+	}
+	return c + r;
+}
+
+function float LI_decode(float x) {
+	int c = floor(x);
+	float r = x - c;
+	for (int i = 0; i < c; ++i) {
+		r = exp(r);
+	}
+	return r;
+}
+
+function vector4 encode(float x) {
+	float sgn = x < 0;
+	float val = abs(x);
+	float e0 = LI_encode(val);
+	float lvl = floor(e0);
+	float r = e0 - lvl;
+	float e1 = 0;
+	if (r != 0) {
+		e1 = LI_encode(1.0 / r);
+	}
+	float rlvl = floor(e1);
+	float rsd = e1 - rlvl;
+	return set(sgn, lvl, rlvl, rsd);
+}
+
+function float decode(vector4 enc) {
+	float sgn = enc.x;
+	float lvl = enc.y;
+	float rlvl = enc.z;
+	float rsd = enc.w;
+	float rdec = LI_decode(rlvl + rsd);
+	float r = rdec;
+	if (rdec != 0) {
+		r = 1.0 / rdec;
+	}
+	float val = LI_decode(lvl + r);
+	if (sgn != 0) {
+		val = -val;
+	}
+	return val;
+}
+
+function int sh_rgb_encode32(vector cfRGB) {
+	int nbits = 32;
+
+	vector4 enc1 = encode(cfRGB.r);
+	vector4 enc2 = encode(cfRGB.g);
+	vector4 enc3 = encode(cfRGB.b);
+
+	int sgn1 = (int)enc1.x;
+	int lvl1 = (int)enc1.y;
+	int rlvl1 = (int)enc1.z;
+	float rsd1 = enc1.w;
+
+	int sgn2 = (int)enc2.x;
+	int lvl2 = (int)enc2.y;
+	int rlvl2 = (int)enc2.z;
+	float rsd2 = enc2.w;
+
+	int sgn3 = (int)enc3.x;
+	int lvl3 = (int)enc3.y;
+	int rlvl3 = (int)enc3.z;
+	float rsd3 = enc3.w;
+
+	int mode = 0;
+	int nrsd = 6;
+	int nlvl = 1;
+	if (lvl1 > 1 || lvl2 > 1 || lvl3 > 1) {
+		mode = 1;
+		--nrsd;
+		++nlvl;
+	}
+
+	int res = 0;
+	res |= shl(sgn1, nbits-1);
+	res |= shl(sgn2, nbits-2);
+	res |= shl(sgn3, nbits-3);
+	res |= shl(mode, nbits-4);
+
+	res |= shl( lvl1 | shl(lvl2, nlvl) | shl(lvl3, nlvl*2), nbits-4 - nlvl*3 );
+
+	float scl = (float)(shl(1, nrsd) - 1);
+	vector rsd = set(rsd1, rsd2, rsd3) * scl;
+	int rlvl[] = array(rlvl1, rlvl2, rlvl3);
+	for (int i = 0; i < 3; i++) {
+		if (rlvl[i] > 3) {
+			rlvl[i] = 0;
+			rsd[i] = 0.0;
+		}
+	}
+	int irsd[] = array(0, 0, 0);
+	for (int i = 0; i < 3; ++i) {
+		irsd[i] = floor(rsd[i]);
+	}
+	res |= shl( irsd[0] | shl(irsd[1], nrsd) | shl(irsd[2], nrsd*2), 6 );
+
+	res |= rlvl[0] | shl(rlvl[1], 2) | shl(rlvl[2], 4);
+
+	return res;
+}
+
+function vector sh_rgb_decode32(int enc) {
+	int nbits = 32;
+
+	int sgn1 = (enc & shl(1, nbits-1)) != 0;
+	int sgn2 = (enc & shl(1, nbits-2)) != 0;
+	int sgn3 = (enc & shl(1, nbits-3)) != 0;
+	int mode = (enc & shl(1, nbits-4)) != 0;
+	vector sgn = set((float)sgn1, (float)sgn2, (float)sgn3);
+
+	int nrsd = 6;
+	int nlvl = 1;
+	if (mode) {
+		--nrsd;
+		++nlvl;
+	}
+	int slvl = nbits-4 - nlvl*3;
+	int scl = shl(1, nrsd) - 1;
+
+	int rlvl1 = enc & 3;
+	int rlvl2 = shr(enc, 2) & 3;
+	int rlvl3 = shr(enc, 4) & 3;
+	vector rlvl = set((float)rlvl1, (float)rlvl2, (float)rlvl3);
+
+	int bits = shr(enc, 6);
+	int rsd1 = bits & scl;
+	int rsd2 = shr(bits, nrsd) & scl;
+	int rsd3 = shr(bits, nrsd*2) & scl;
+	vector rsd = set((float)rsd1, (float)rsd2, (float)rsd3);
+	rsd /= (float)scl;
+
+	bits = shr(enc, slvl);
+	int mask = shl(1, nlvl) - 1;
+	int lvl1 = bits & mask;
+	int lvl2 = shr(bits, nlvl) & mask;
+	int lvl3 = shr(bits, nlvl*2) & mask;
+	vector lvl = set((float)lvl1, (float)lvl2, (float)lvl3);
+
+	vector res = set(0, 0, 0);
+	for (int i = 0; i < 3; ++i) {
+		res[i] = decode(set(sgn[i], lvl[i], rlvl[i], rsd[i]));
+	}
+	return res;
+}
+
+// int enc = sh_rgb_encode32(set(0.738, 0.6004, 0.4954));
+// i@SH_E = enc;
+// @Cd = sh_rgb_decode32(enc);
